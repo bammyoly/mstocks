@@ -1,0 +1,105 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# =========================
+# Env & secrets (NEVER commit)
+# =========================
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.key
+secrets/
+.wallet-seed*
+
+# =========================
+# Build / output
+# =========================
+dist/
+build/
+out/
+.turbo/
+.cache/
+**/.vite/
+**/dist/
+**/build/
+
+# =========================
+# Midnight / contract local state
+# =========================
+# Compiled artifacts can be large; judges clone source + your README deploy address.
+# If you WANT keys in repo for one-click frontend, comment the next block out.
+# contract/managed/
+# contract/src/managed/
+# frontend/src/contracts/trading/keys/
+# frontend/src/contracts/trading/zkir/
+
+# Local DBs & wallet caches from deploy scripts
+**/*level-db*/
+**/*leveldb*/
+**/mstocks-level-db/
+**/midnight-level-db/
+**/trading-private-state/
+**/.wallet-state/
+**/*-private-state/
+**/mstocks-signing-keys/
+deployment.json
+contract/deployment.json
+
+# =========================
+# Logs & debug
+# =========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Test / coverage
+# =========================
+coverage/
+.nyc_output/
+**/coverage/
+
+# =========================
+# OS / IDE
+# =========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# =========================
+# TypeScript / tooling
+# =========================
+*.tsbuildinfo
+.eslintcache
+
+# =========================
+# Optional: Docker / tmp
+# =========================
+tmp/
+temp/
+*.tmp
+
+# =========================
+# Misc
+# =========================
+*.local
+.vercel
+.netlify
+videoscript

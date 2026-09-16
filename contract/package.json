@@ -1,0 +1,46 @@
+{
+  "name": "mstocks",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MStocks — trading.compact: compile, deploy and export pipeline for the Midnight Preview testnet",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "compile": "compact compile +0.31.1 trading.compact managed/",
+    "compile:fast": "compact compile +0.31.1 --skip-zk trading.compact managed/",
+    "deploy": "tsx deploy.ts",
+    "balance": "tsx balance.ts",
+    "postinstall": "patch-package",
+    "start-proof-server": "docker run -p 6300:6300 midnightntwrk/proof-server:8.1.0 -- midnight-proof-server -v"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/compact-js": "2.5.1",
+    "@midnight-ntwrk/compact-runtime": "0.16.0",
+    "@midnight-ntwrk/ledger-v8": "8.1.0",
+    "@midnight-ntwrk/midnight-js": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-http-client-proof-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-level-private-state-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-node-zk-config-provider": "^4.1.1",
+    "@midnightntwrk/wallet-sdk": "^1.2.0",
+    "@scure/bip39": "^1.5.0",
+    "buffer": "^6.0.3",
+    "dotenv": "^16.4.7",
+    "rxjs": "^7.8.1",
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/ws": "^8.18.1",
+    "patch-package": "^8.0.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "overrides": {
+    "@midnight-ntwrk/compact-js": "2.5.1",
+    "@midnight-ntwrk/ledger-v8": "8.1.0",
+    "@midnight-ntwrk/onchain-runtime-v3": "3.0.0"
+  }
+}

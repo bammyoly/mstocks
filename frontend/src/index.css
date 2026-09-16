@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-midnight-bg: #0b0f19;
+  --color-midnight-card: #111827;
+  --color-midnight-border: #1f2937;
+  --color-midnight-accent: #7c3aed;
+  --color-midnight-glow: #a855f7;
+}
+
+html, body, #root {
+  min-height: 100vh;
+  background-color: var(--color-midnight-bg);
+  color: #f8fafc;
+  font-family: var(--font-sans);
+}

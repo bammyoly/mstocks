@@ -1,0 +1,13 @@
+diff --git a/node_modules/@midnightntwrk/wallet-sdk-shielded/dist/v1/CoreWallet.js b/node_modules/@midnightntwrk/wallet-sdk-shielded/dist/v1/CoreWallet.js
+index 2e72d62..56ea621 100644
+--- a/node_modules/@midnightntwrk/wallet-sdk-shielded/dist/v1/CoreWallet.js
++++ b/node_modules/@midnightntwrk/wallet-sdk-shielded/dist/v1/CoreWallet.js
+@@ -25,7 +25,7 @@ export const PublicKeys = {
+ export const CoinHashesMap = {
+     empty: {},
+     pickAllCoins(state) {
+-        return [...state.coins, ...state.pendingOutputs.values().map(([coin]) => coin)];
++        return [...state.coins, ...Array.from(state.pendingOutputs.values()).map(([coin]) => coin)];
+     },
+     assertValid(map, state) {
+         const coins = CoinHashesMap.pickAllCoins(state);

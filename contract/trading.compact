@@ -1,0 +1,368 @@
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+// =============================================================================
+// MStocks — Confidential test stock trading (Midnight Preview)
+//
+// Private (witness / local wallet):
+//   - cash balance, stock positions, order salts, local secret key
+//
+// Public ledger:
+//   - order commitments -> owner DApp pubkey (never price/qty/side in the clear)
+//   - lastPrice / totalVolume aggregates
+//   - activeOrderCount
+//   - verifiedWallets (human-gated)
+//   - lastFaucetClaim (unix seconds) for 7-day faucet countdown UI
+//
+// Currency: integer "cents" (1 USDC = 100 units). Faucet pays 1000 USDC = 100000.
+// =============================================================================
+
+export enum Ticker {
+  AAPL,
+  TSLA,
+  GOOGL,
+  MSFT,
+  AMZN,
+  NVDA,
+  SPY,
+  META,
+  NFLX,
+  AMD
+}
+
+export enum OrderSide {
+  BUY,
+  SELL
+}
+
+// ----- Public ledger ---------------------------------------------------------
+
+export ledger activeOrderCount: Uint<64>;
+
+export ledger lastPrice: Map<Ticker, Uint<64>>;
+
+export ledger totalVolume: Map<Ticker, Uint<64>>;
+
+// commitment -> owner DApp public key
+export ledger activeOrders: Map<Bytes<32>, Bytes<32>>;
+
+// owner DApp public key -> verified human
+export ledger verifiedWallets: Map<Bytes<32>, Boolean>;
+
+// owner DApp public key -> unix timestamp (seconds) of last faucet claim
+export ledger lastFaucetClaim: Map<Bytes<32>, Uint<64>>;
+
+// ----- Constants (document for frontend) -------------------------------------
+// FAUCET_AMOUNT_CENTS  = 100000   // $1000.00
+// FAUCET_COOLDOWN_SECS = 604800   // 7 days
+
+// ----- Witnesses (TypeScript / wallet private state) --------------------------
+
+witness getPrivateBalance(): Uint<64>;
+witness getPrivateStockPosition(ticker: Ticker): Uint<64>;
+witness getOrderSalt(): Field;
+witness getLocalSecretKey(): Bytes<32>;
+
+// Mutators: return the NEW private balance / position after the change
+witness creditPrivateCash(amount: Uint<64>): Uint<64>;
+witness debitPrivateCash(amount: Uint<64>): Uint<64>;
+witness creditPrivateStock(ticker: Ticker, quantity: Uint<64>): Uint<64>;
+witness debitPrivateStock(ticker: Ticker, quantity: Uint<64>): Uint<64>;
+
+// Current unix time in seconds (UI/oracle). Disclose for faucet cooldown checks.
+// Production: prefer chain/ledger time if your Compact runtime exposes it.
+witness getCurrentTimestamp(): Uint<64>;
+
+// Optional voucher blob for off-chain Turnstile/oracle flows (testnet may ignore)
+witness getVerificationVoucher(): Bytes<64>;
+
+constructor() {
+  activeOrderCount = 0 as Uint<64>;
+}
+
+// =============================================================================
+// Identity / verification
+// =============================================================================
+
+export circuit verifyWallet(): [] {
+  const ownerKey = getDappPublicKey(getLocalSecretKey());
+  const disclosedOwner = disclose(ownerKey);
+
+  assert(!verifiedWallets.member(disclosedOwner), "Wallet is already verified");
+
+  // Testnet: proving control of localSecretKey + inserting owner is enough.
+  // Production: verify getVerificationVoucher() as a signature over ownerKey
+  // from your Turnstile-backed API / oracle before insert.
+  const _voucher = getVerificationVoucher();
+
+  verifiedWallets.insert(disclosedOwner, true);
+}
+
+// =============================================================================
+// Faucet — 1000 USDC once every 7 days (per DApp pubkey)
+// =============================================================================
+
+export circuit claimFaucet(): [] {
+  const ownerKey = getDappPublicKey(getLocalSecretKey());
+  const disclosedOwner = disclose(ownerKey);
+
+  assert(
+    verifiedWallets.member(disclosedOwner),
+    "Wallet must be human-verified before claiming faucet"
+  );
+
+  const now = disclose(getCurrentTimestamp());
+  assert(now > 0, "Invalid timestamp");
+
+  const cooldown = 604800 as Uint<64>; // 7 days
+  const faucetAmount = 100000 as Uint<64>; // $1000.00 in cents
+
+  if (lastFaucetClaim.member(disclosedOwner)) {
+    const last = lastFaucetClaim.lookup(disclosedOwner);
+    // nextAllowed = last + 7d (assert no absurd wrap for demo timestamps)
+    assert(last <= now, "Claim timestamp is in the future");
+    const elapsed = (now - last) as Uint<64>;
+    assert(elapsed >= cooldown, "Faucet available once every 7 days");
+  }
+
+  lastFaucetClaim.insert(disclosedOwner, now);
+
+  const newBal = creditPrivateCash(faucetAmount);
+  assert(newBal >= faucetAmount, "Private cash credit failed");
+}
+
+// =============================================================================
+// Deposit / mint (demo — still require verification)
+// =============================================================================
+
+export circuit depositCash(amount: Uint<64>): [] {
+  assert(amount > 0, "Deposit amount must be positive");
+  assert(amount <= 100000000000, "Deposit too large");
+
+  const ownerKey = getDappPublicKey(getLocalSecretKey());
+  const disclosedOwner = disclose(ownerKey);
+  assert(
+    verifiedWallets.member(disclosedOwner),
+    "Wallet must be human-verified before depositing"
+  );
+
+  const newBalance = creditPrivateCash(amount);
+  assert(newBalance >= amount, "Balance overflow or credit failed");
+}
+
+export circuit mintTestStock(ticker: Ticker, quantity: Uint<64>): [] {
+  assert(quantity > 0, "Quantity must be positive");
+  assert(quantity <= 1000000000, "Mint quantity too large");
+
+  const ownerKey = getDappPublicKey(getLocalSecretKey());
+  const disclosedOwner = disclose(ownerKey);
+  assert(
+    verifiedWallets.member(disclosedOwner),
+    "Wallet must be human-verified before minting stock"
+  );
+
+  const newPosition = creditPrivateStock(ticker, quantity);
+  assert(newPosition >= quantity, "Position overflow or credit failed");
+}
+
+// =============================================================================
+// Orders
+// =============================================================================
+
+// Locks funds (BUY) or shares (SELL) in private state, posts opaque commitment.
+export circuit placeOrder(
+  side: OrderSide,
+  ticker: Ticker,
+  quantity: Uint<64>,
+  price: Uint<64>
+): Bytes<32> {
+  assert(quantity > 0, "Order quantity must be positive");
+  assert(price > 0, "Order price must be positive");
+  assert(quantity <= 1000000000, "Order quantity too large");
+  assert(price <= 1000000000, "Order price too large");
+
+  const ownerKey = getDappPublicKey(getLocalSecretKey());
+  const disclosedOwner = disclose(ownerKey);
+  assert(
+    verifiedWallets.member(disclosedOwner),
+    "Wallet must be human-verified before trading"
+  );
+
+  const notional = (quantity * price) as Uint<64>;
+
+  if (side == OrderSide.BUY) {
+    const bal = getPrivateBalance();
+    assert(bal >= notional, "Insufficient private cash for buy order");
+    const left = debitPrivateCash(notional);
+    assert(left == (bal - notional) as Uint<64>, "Cash debit mismatch");
+  } else {
+    const holding = getPrivateStockPosition(ticker);
+    assert(holding >= quantity, "Insufficient private stock for sell order");
+    const left = debitPrivateStock(ticker, quantity);
+    assert(left == (holding - quantity) as Uint<64>, "Stock debit mismatch");
+  }
+
+  const salt = getOrderSalt();
+  const commitment = computeOrderCommitment(
+    salt,
+    side as Field,
+    ticker as Field,
+    quantity as Field,
+    price as Field
+  );
+  const disclosedCommitment = disclose(commitment);
+
+  assert(!activeOrders.member(disclosedCommitment), "Identical order already active");
+
+  activeOrders.insert(disclosedCommitment, disclosedOwner);
+  activeOrderCount = (activeOrderCount + 1) as Uint<64>;
+
+  return disclosedCommitment;
+}
+
+// Owner-only cancel; unlocks locked cash or shares. Requires order preimage.
+export circuit cancelOrder(
+  salt: Field,
+  side: OrderSide,
+  ticker: Ticker,
+  quantity: Uint<64>,
+  price: Uint<64>
+): [] {
+  assert(quantity > 0, "Order quantity must be positive");
+  assert(price > 0, "Order price must be positive");
+
+  const ownerKey = getDappPublicKey(getLocalSecretKey());
+  const disclosedOwner = disclose(ownerKey);
+
+  const commitment = computeOrderCommitment(
+    salt,
+    side as Field,
+    ticker as Field,
+    quantity as Field,
+    price as Field
+  );
+  const id = disclose(commitment);
+
+  assert(activeOrders.member(id), "Order is not active");
+  assert(activeOrders.lookup(id) == disclosedOwner, "Only the order owner can cancel");
+
+  activeOrders.remove(id);
+
+  assert(activeOrderCount >= 1, "activeOrderCount underflow");
+  activeOrderCount = (activeOrderCount - 1) as Uint<64>;
+
+  const notional = (quantity * price) as Uint<64>;
+  if (side == OrderSide.BUY) {
+    const newBal = creditPrivateCash(notional);
+    assert(newBal >= notional, "Cash unlock failed");
+  } else {
+    const newPos = creditPrivateStock(ticker, quantity);
+    assert(newPos >= quantity, "Stock unlock failed");
+  }
+}
+
+// Secure match: recompute both commitments from preimages + economic checks.
+// Public print: ticker, trade qty, trade price (for charts).
+// Private balance settlement on fill remains wallet-side for this demo build;
+// locks were already taken at placeOrder.
+export circuit executeTrade(
+  ticker: Ticker,
+  tradeQuantity: Uint<64>,
+  tradePrice: Uint<64>,
+  // BUY order preimage
+  buySalt: Field,
+  buyQuantity: Uint<64>,
+  buyPrice: Uint<64>,
+  // SELL order preimage
+  sellSalt: Field,
+  sellQuantity: Uint<64>,
+  sellPrice: Uint<64>
+): [] {
+  assert(tradeQuantity > 0, "Trade quantity must be positive");
+  assert(tradePrice > 0, "Trade price must be positive");
+  assert(tradeQuantity <= 1000000000, "Trade quantity too large");
+  assert(tradePrice <= 1000000000, "Trade price too large");
+
+  assert(buyQuantity >= tradeQuantity, "Trade qty exceeds buy size");
+  assert(sellQuantity >= tradeQuantity, "Trade qty exceeds sell size");
+  assert(buyPrice >= tradePrice, "Buy limit below trade price");
+  assert(sellPrice <= tradePrice, "Sell limit above trade price");
+
+  const buyCommitment = computeOrderCommitment(
+    buySalt,
+    OrderSide.BUY as Field,
+    ticker as Field,
+    buyQuantity as Field,
+    buyPrice as Field
+  );
+  const sellCommitment = computeOrderCommitment(
+    sellSalt,
+    OrderSide.SELL as Field,
+    ticker as Field,
+    sellQuantity as Field,
+    sellPrice as Field
+  );
+
+  const buyId = disclose(buyCommitment);
+  const sellId = disclose(sellCommitment);
+  const dTicker = disclose(ticker);
+  const dQty = disclose(tradeQuantity);
+  const dPrice = disclose(tradePrice);
+
+  assert(buyId != sellId, "Cannot trade an order against itself");
+  assert(activeOrders.member(buyId), "Buy order is not active");
+  assert(activeOrders.member(sellId), "Sell order is not active");
+  assert(
+    activeOrders.lookup(buyId) != activeOrders.lookup(sellId),
+    "Buy and sell orders belong to the same trader"
+  );
+
+  activeOrders.remove(buyId);
+  activeOrders.remove(sellId);
+
+  assert(activeOrderCount >= 2, "activeOrderCount underflow");
+  activeOrderCount = (activeOrderCount - 2) as Uint<64>;
+
+  lastPrice.insert(dTicker, dPrice);
+
+  if (totalVolume.member(dTicker)) {
+    const vol = totalVolume.lookup(dTicker);
+    totalVolume.insert(dTicker, (vol + dQty) as Uint<64>);
+  } else {
+    totalVolume.insert(dTicker, dQty);
+  }
+
+  // Note: full residual order re-listing for partial fills is out of scope here
+  // (demo assumes fill consumes both commitments). Production would re-commit
+  // residuals or use a more expressive book.
+}
+
+// =============================================================================
+// Helpers
+// =============================================================================
+
+// Hash only — caller discloses when posting to the public ledger.
+circuit computeOrderCommitment(
+  salt: Field,
+  side: Field,
+  ticker: Field,
+  quantity: Field,
+  price: Field
+): Bytes<32> {
+  return persistentHash<Vector<5, Field>>([
+    salt,
+    side,
+    ticker,
+    quantity,
+    price
+  ]);
+}
+
+// DApp-tagged pubkey so the same secret is unlinkable across DApps.
+circuit getDappPublicKey(secretKey: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "mstocks:pk:"),
+    secretKey
+  ]);
+}

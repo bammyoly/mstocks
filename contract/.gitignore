@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# secrets
+.env
+
+# local caches (Node 22 fetched by bootstrap.sh, Compact toolchain)
+.cache/
+
+# local wallet + private state stores (synced wallet state / encrypted private state)
+.wallet-state/
+mstocks-level-db/
+midnight-level-db/
+
+# logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store

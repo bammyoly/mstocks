@@ -1,0 +1,573 @@
+{
+  "compiler-version": "0.31.1",
+  "language-version": "0.23.0",
+  "runtime-version": "0.16.0",
+  "circuits": [
+    {
+      "name": "verifyWallet",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "claimFaucet",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "depositCash",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "amount",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "mintTestStock",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "ticker",
+          "type": {
+            "type-name": "Enum",
+            "name": "Ticker",
+            "elements": [
+              "AAPL",
+              "TSLA",
+              "GOOGL",
+              "MSFT",
+              "AMZN",
+              "NVDA",
+              "SPY",
+              "META",
+              "NFLX",
+              "AMD"
+            ]
+          }
+        },
+        {
+          "name": "quantity",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "placeOrder",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "side",
+          "type": {
+            "type-name": "Enum",
+            "name": "OrderSide",
+            "elements": [
+              "BUY",
+              "SELL"
+            ]
+          }
+        },
+        {
+          "name": "ticker",
+          "type": {
+            "type-name": "Enum",
+            "name": "Ticker",
+            "elements": [
+              "AAPL",
+              "TSLA",
+              "GOOGL",
+              "MSFT",
+              "AMZN",
+              "NVDA",
+              "SPY",
+              "META",
+              "NFLX",
+              "AMD"
+            ]
+          }
+        },
+        {
+          "name": "quantity",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        },
+        {
+          "name": "price",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    },
+    {
+      "name": "cancelOrder",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "salt",
+          "type": {
+            "type-name": "Field"
+          }
+        },
+        {
+          "name": "side",
+          "type": {
+            "type-name": "Enum",
+            "name": "OrderSide",
+            "elements": [
+              "BUY",
+              "SELL"
+            ]
+          }
+        },
+        {
+          "name": "ticker",
+          "type": {
+            "type-name": "Enum",
+            "name": "Ticker",
+            "elements": [
+              "AAPL",
+              "TSLA",
+              "GOOGL",
+              "MSFT",
+              "AMZN",
+              "NVDA",
+              "SPY",
+              "META",
+              "NFLX",
+              "AMD"
+            ]
+          }
+        },
+        {
+          "name": "quantity",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        },
+        {
+          "name": "price",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "executeTrade",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "ticker",
+          "type": {
+            "type-name": "Enum",
+            "name": "Ticker",
+            "elements": [
+              "AAPL",
+              "TSLA",
+              "GOOGL",
+              "MSFT",
+              "AMZN",
+              "NVDA",
+              "SPY",
+              "META",
+              "NFLX",
+              "AMD"
+            ]
+          }
+        },
+        {
+          "name": "tradeQuantity",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        },
+        {
+          "name": "tradePrice",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        },
+        {
+          "name": "buySalt",
+          "type": {
+            "type-name": "Field"
+          }
+        },
+        {
+          "name": "buyQuantity",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        },
+        {
+          "name": "buyPrice",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        },
+        {
+          "name": "sellSalt",
+          "type": {
+            "type-name": "Field"
+          }
+        },
+        {
+          "name": "sellQuantity",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        },
+        {
+          "name": "sellPrice",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    }
+  ],
+  "witnesses": [
+    {
+      "name": "getPrivateBalance",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "getPrivateStockPosition",
+      "arguments": [
+        {
+          "name": "ticker",
+          "type": {
+            "type-name": "Enum",
+            "name": "Ticker",
+            "elements": [
+              "AAPL",
+              "TSLA",
+              "GOOGL",
+              "MSFT",
+              "AMZN",
+              "NVDA",
+              "SPY",
+              "META",
+              "NFLX",
+              "AMD"
+            ]
+          }
+        }
+      ],
+      "result type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "getOrderSalt",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Field"
+      }
+    },
+    {
+      "name": "getLocalSecretKey",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    },
+    {
+      "name": "creditPrivateCash",
+      "arguments": [
+        {
+          "name": "amount",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "debitPrivateCash",
+      "arguments": [
+        {
+          "name": "amount",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "creditPrivateStock",
+      "arguments": [
+        {
+          "name": "ticker",
+          "type": {
+            "type-name": "Enum",
+            "name": "Ticker",
+            "elements": [
+              "AAPL",
+              "TSLA",
+              "GOOGL",
+              "MSFT",
+              "AMZN",
+              "NVDA",
+              "SPY",
+              "META",
+              "NFLX",
+              "AMD"
+            ]
+          }
+        },
+        {
+          "name": "quantity",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "debitPrivateStock",
+      "arguments": [
+        {
+          "name": "ticker",
+          "type": {
+            "type-name": "Enum",
+            "name": "Ticker",
+            "elements": [
+              "AAPL",
+              "TSLA",
+              "GOOGL",
+              "MSFT",
+              "AMZN",
+              "NVDA",
+              "SPY",
+              "META",
+              "NFLX",
+              "AMD"
+            ]
+          }
+        },
+        {
+          "name": "quantity",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "getCurrentTimestamp",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "getVerificationVoucher",
+      "arguments": [
+      ],
+      "result type": {
+        "type-name": "Bytes",
+        "length": 64
+      }
+    }
+  ],
+  "contracts": [
+  ],
+  "ledger": [
+    {
+      "name": "activeOrderCount",
+      "index": 0,
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "lastPrice",
+      "index": 1,
+      "exported": true,
+      "storage": "Map",
+      "key": {
+        "type-name": "Enum",
+        "name": "Ticker",
+        "elements": [
+          "AAPL",
+          "TSLA",
+          "GOOGL",
+          "MSFT",
+          "AMZN",
+          "NVDA",
+          "SPY",
+          "META",
+          "NFLX",
+          "AMD"
+        ]
+      },
+      "value": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "totalVolume",
+      "index": 2,
+      "exported": true,
+      "storage": "Map",
+      "key": {
+        "type-name": "Enum",
+        "name": "Ticker",
+        "elements": [
+          "AAPL",
+          "TSLA",
+          "GOOGL",
+          "MSFT",
+          "AMZN",
+          "NVDA",
+          "SPY",
+          "META",
+          "NFLX",
+          "AMD"
+        ]
+      },
+      "value": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "activeOrders",
+      "index": 3,
+      "exported": true,
+      "storage": "Map",
+      "key": {
+        "type-name": "Bytes",
+        "length": 32
+      },
+      "value": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    },
+    {
+      "name": "verifiedWallets",
+      "index": 4,
+      "exported": true,
+      "storage": "Map",
+      "key": {
+        "type-name": "Bytes",
+        "length": 32
+      },
+      "value": {
+        "type-name": "Boolean"
+      }
+    },
+    {
+      "name": "lastFaucetClaim",
+      "index": 5,
+      "exported": true,
+      "storage": "Map",
+      "key": {
+        "type-name": "Bytes",
+        "length": 32
+      },
+      "value": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    }
+  ]
+}
