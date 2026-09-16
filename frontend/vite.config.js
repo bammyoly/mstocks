@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import wasm from 'vite-plugin-wasm';
-import topLevelAwait from 'vite-plugin-top-level-await';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 // https://vite.dev/config/
@@ -11,7 +10,6 @@ export default defineConfig({
     react(),
     tailwindcss(),
     wasm(),
-    topLevelAwait(),
     nodePolyfills({
       include: ['buffer', 'crypto', 'stream', 'util', 'process'],
       globals: {
@@ -25,7 +23,12 @@ export default defineConfig({
     target: 'esnext',
   },
   optimizeDeps: {
-    esbuildOptions: {
+    rolldownOptions: {
+      resolve: {
+        conditionNames: ['import', 'module', 'browser', 'default'],
+      },
+    },
+    esbuild: {
       target: 'esnext',
     },
     include: [
