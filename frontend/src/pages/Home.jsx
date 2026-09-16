@@ -205,7 +205,7 @@ const GLOBAL_CSS = `
   html { scroll-behavior: smooth; }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .mstocks-marquee, .mstocks-float, .mstocks-shake, .mstocks-blink, .mstocks-scan { animation: none !important; }
+    .mstocks-marquee, .mstocks-float, .mstocks-shake, .mstocks-blink, .mstocks-scan, .mstocks-hang { animation: none !important; }
   }
   .neo-grid {
     background-image:
@@ -246,6 +246,19 @@ const GLOBAL_CSS = `
     100% { transform: translateY(100%); }
   }
   .mstocks-scan { animation: mstocks-scan 3.5s linear infinite; }
+  /* Gentle pendulum sway — makes the hero card read as "hanging" from the string above it */
+  @keyframes mstocks-hang {
+    0%, 100% { transform: rotate(-1.1deg); }
+    50% { transform: rotate(1.1deg); }
+  }
+  .mstocks-hang {
+    transform-origin: top center;
+    animation: mstocks-hang 5.5s ease-in-out infinite;
+    will-change: transform;
+  }
+  .mstocks-hang:hover {
+    animation-play-state: paused;
+  }
   details.mstocks-faq summary::-webkit-details-marker { display: none; }
   details.mstocks-faq summary { list-style: none; }
 `;
@@ -532,147 +545,155 @@ function Hero() {
               <span aria-hidden className="flex-1 h-px bg-zinc-800" />
             </div>
 
-            {/* Backdrop stack — layered brutalist depth */}
-            <div className="relative">
-              {/* Back plate */}
-              <div
-                aria-hidden
-                className="absolute inset-0 translate-x-3 translate-y-3 border-2 border-white bg-[#A855F7]"
-              />
-              {/* Mid plate */}
-              <div
-                aria-hidden
-                className="absolute inset-0 translate-x-1.5 translate-y-1.5 border-2 border-white bg-[#0A0A0C]"
-              />
+            {/* Hanging string — anchors the card visually to the row above it */}
+            <div aria-hidden className="hidden lg:flex justify-center">
+              <span className="w-px h-6 bg-zinc-600" />
+            </div>
 
-              {/* Main card */}
-              <div className="relative bg-[#12121A] border-2 border-white">
-                {/* Card chrome header (window-style) */}
-                <div className="flex items-stretch border-b-2 border-white bg-[#0A0A0C]">
-                  <div className="flex items-center gap-1.5 px-3 border-r-2 border-white">
-                    <span aria-hidden className="w-2.5 h-2.5 border border-white bg-[#A855F7]" />
-                    <span aria-hidden className="w-2.5 h-2.5 border border-white bg-zinc-700" />
-                    <span aria-hidden className="w-2.5 h-2.5 border border-white bg-[#10B981]" />
-                  </div>
-                  <div className="flex-1 flex items-center justify-center px-3 py-2 border-r-2 border-white">
-                    <span className="font-mono text-[10px] font-bold tracking-widest text-zinc-400 uppercase truncate">
-                      order.commitment
+            {/* Swaying wrapper — everything inside sways together like it's hanging from the string */}
+            <div className="mstocks-hang relative">
+              {/* Backdrop stack — layered brutalist depth */}
+              <div className="relative">
+                {/* Back plate */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 translate-x-3 translate-y-3 border-2 border-white bg-[#A855F7]"
+                />
+                {/* Mid plate */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 translate-x-1.5 translate-y-1.5 border-2 border-white bg-[#0A0A0C]"
+                />
+
+                {/* Main card */}
+                <div className="relative bg-[#12121A] border-2 border-white">
+                  {/* Card chrome header (window-style) */}
+                  <div className="flex items-stretch border-b-2 border-white bg-[#0A0A0C]">
+                    <div className="flex items-center gap-1.5 px-3 border-r-2 border-white">
+                      <span aria-hidden className="w-2.5 h-2.5 border border-white bg-[#A855F7]" />
+                      <span aria-hidden className="w-2.5 h-2.5 border border-white bg-zinc-700" />
+                      <span aria-hidden className="w-2.5 h-2.5 border border-white bg-[#10B981]" />
+                    </div>
+                    <div className="flex-1 flex items-center justify-center px-3 py-2 border-r-2 border-white">
+                      <span className="font-mono text-[10px] font-bold tracking-widest text-zinc-400 uppercase truncate">
+                        order.commitment
+                      </span>
+                    </div>
+                    <span className="flex items-center px-3 font-mono text-[10px] font-black tracking-widest text-[#0A0A0C] bg-white uppercase">
+                      Demo
                     </span>
                   </div>
-                  <span className="flex items-center px-3 font-mono text-[10px] font-black tracking-widest text-[#0A0A0C] bg-white uppercase">
-                    Demo
-                  </span>
+
+                  {/* Section: identity */}
+                  <div className="px-5 py-4 border-b-2 border-white/10">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-mono text-[9px] font-bold tracking-widest text-zinc-500 uppercase">
+                        § Public state
+                      </span>
+                      <span className="flex items-center gap-1.5 font-mono text-[9px] font-bold tracking-widest text-[#10B981] uppercase">
+                        <span aria-hidden className="w-1.5 h-1.5 bg-[#10B981]" />
+                        Verified
+                      </span>
+                    </div>
+
+                    <dl className="space-y-2.5 font-mono text-xs">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <dt className="text-zinc-500 shrink-0">commitment</dt>
+                        <dd title={HERO_ORDER.commitment} className="text-white font-bold break-all text-right">
+                          {shortHex(HERO_ORDER.commitment)}
+                        </dd>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-3">
+                        <dt className="text-zinc-500 shrink-0">owner_key</dt>
+                        <dd className="text-white font-bold">
+                          {shortHex(HERO_ORDER.ownerKey, 8, 4)}
+                          <span className="text-zinc-600 font-normal"> ↳ dapp</span>
+                        </dd>
+                      </div>
+                      <div className="flex items-baseline justify-between gap-3">
+                        <dt className="text-zinc-500 shrink-0">ticker</dt>
+                        <dd className="inline-flex items-center gap-1.5">
+                          <span aria-hidden className="w-1.5 h-1.5 bg-[#A855F7]" />
+                          <span className="text-white font-bold">{HERO_ORDER.ticker}</span>
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+
+                  {/* Section: private (redacted) */}
+                  <div className="relative px-5 py-4 border-b-2 border-white/10 neo-diagonal overflow-hidden">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-mono text-[9px] font-bold tracking-widest text-zinc-500 uppercase">
+                        § Private witnesses
+                      </span>
+                      <span className="font-mono text-[9px] font-bold tracking-widest text-[#A855F7] uppercase">
+                        Wallet-only
+                      </span>
+                    </div>
+
+                    <dl className="space-y-3 font-mono text-xs">
+                      <div className="flex items-center justify-between gap-3">
+                        <dt className="text-zinc-500">price</dt>
+                        <dd className="flex items-center gap-1">
+                          <RedactedBar w="w-7" shake={revealTried} />
+                          <RedactedBar w="w-10" shake={revealTried} />
+                          <RedactedBar w="w-5" shake={revealTried} />
+                          <RedactedBar w="w-8" shake={revealTried} />
+                        </dd>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <dt className="text-zinc-500">qty</dt>
+                        <dd className="flex items-center gap-1">
+                          <RedactedBar w="w-6" shake={revealTried} />
+                          <RedactedBar w="w-9" shake={revealTried} />
+                          <RedactedBar w="w-4" shake={revealTried} />
+                        </dd>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <dt className="text-zinc-500">side</dt>
+                        <dd className="flex items-center gap-1">
+                          <RedactedBar w="w-12" shake={revealTried} />
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+
+                  {/* Section: footer status */}
+                  <div className="px-5 py-4 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 font-mono text-xs">
+                      <span className="text-[#10B981] font-bold">✓ proof accepted</span>
+                      <span className="text-zinc-500">Δ activeOrderCount +1</span>
+                    </div>
+
+                    {revealTried ? (
+                      <p
+                        role="status"
+                        className="inline-block bg-[#A855F7] text-white border-2 border-white px-3 py-1.5 font-bold text-sm shadow-[3px_3px_0px_0px_#FFFFFF]"
+                      >
+                        ✗ Nice try — the preimage never leaves your wallet.
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setRevealTried(true)}
+                        className={`${FOCUS} font-mono text-xs text-[#10B981] font-bold underline decoration-2 underline-offset-4 hover:text-white transition-colors`}
+                      >
+                        ▸ attempt to decrypt
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                {/* Section: identity */}
-                <div className="px-5 py-4 border-b-2 border-white/10">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-mono text-[9px] font-bold tracking-widest text-zinc-500 uppercase">
-                      § Public state
-                    </span>
-                    <span className="flex items-center gap-1.5 font-mono text-[9px] font-bold tracking-widest text-[#10B981] uppercase">
-                      <span aria-hidden className="w-1.5 h-1.5 bg-[#10B981]" />
-                      Verified
-                    </span>
-                  </div>
+                {/* Corner registration marks (crosshairs) */}
+                <span aria-hidden className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-white" />
+                <span aria-hidden className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-white" />
+                <span aria-hidden className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-white" />
+                <span aria-hidden className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-white" />
 
-                  <dl className="space-y-2.5 font-mono text-xs">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <dt className="text-zinc-500 shrink-0">commitment</dt>
-                      <dd title={HERO_ORDER.commitment} className="text-white font-bold break-all text-right">
-                        {shortHex(HERO_ORDER.commitment)}
-                      </dd>
-                    </div>
-                    <div className="flex items-baseline justify-between gap-3">
-                      <dt className="text-zinc-500 shrink-0">owner_key</dt>
-                      <dd className="text-white font-bold">
-                        {shortHex(HERO_ORDER.ownerKey, 8, 4)}
-                        <span className="text-zinc-600 font-normal"> ↳ dapp</span>
-                      </dd>
-                    </div>
-                    <div className="flex items-baseline justify-between gap-3">
-                      <dt className="text-zinc-500 shrink-0">ticker</dt>
-                      <dd className="inline-flex items-center gap-1.5">
-                        <span aria-hidden className="w-1.5 h-1.5 bg-[#A855F7]" />
-                        <span className="text-white font-bold">{HERO_ORDER.ticker}</span>
-                      </dd>
-                    </div>
-                  </dl>
+                {/* Stamp — deploy metadata */}
+                <div className="hidden md:block absolute -right-3 -top-3 rotate-3 bg-[#10B981] text-[#0A0A0C] border-2 border-white px-3 py-1.5 font-mono text-[10px] font-black tracking-widest shadow-[3px_3px_0px_0px_#FFFFFF] uppercase">
+                  zk-verified ✓
                 </div>
-
-                {/* Section: private (redacted) */}
-                <div className="relative px-5 py-4 border-b-2 border-white/10 neo-diagonal overflow-hidden">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-mono text-[9px] font-bold tracking-widest text-zinc-500 uppercase">
-                      § Private witnesses
-                    </span>
-                    <span className="font-mono text-[9px] font-bold tracking-widest text-[#A855F7] uppercase">
-                      Wallet-only
-                    </span>
-                  </div>
-
-                  <dl className="space-y-3 font-mono text-xs">
-                    <div className="flex items-center justify-between gap-3">
-                      <dt className="text-zinc-500">price</dt>
-                      <dd className="flex items-center gap-1">
-                        <RedactedBar w="w-7" shake={revealTried} />
-                        <RedactedBar w="w-10" shake={revealTried} />
-                        <RedactedBar w="w-5" shake={revealTried} />
-                        <RedactedBar w="w-8" shake={revealTried} />
-                      </dd>
-                    </div>
-                    <div className="flex items-center justify-between gap-3">
-                      <dt className="text-zinc-500">qty</dt>
-                      <dd className="flex items-center gap-1">
-                        <RedactedBar w="w-6" shake={revealTried} />
-                        <RedactedBar w="w-9" shake={revealTried} />
-                        <RedactedBar w="w-4" shake={revealTried} />
-                      </dd>
-                    </div>
-                    <div className="flex items-center justify-between gap-3">
-                      <dt className="text-zinc-500">side</dt>
-                      <dd className="flex items-center gap-1">
-                        <RedactedBar w="w-12" shake={revealTried} />
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-
-                {/* Section: footer status */}
-                <div className="px-5 py-4 space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 font-mono text-xs">
-                    <span className="text-[#10B981] font-bold">✓ proof accepted</span>
-                    <span className="text-zinc-500">Δ activeOrderCount +1</span>
-                  </div>
-
-                  {revealTried ? (
-                    <p
-                      role="status"
-                      className="inline-block bg-[#A855F7] text-white border-2 border-white px-3 py-1.5 font-bold text-sm shadow-[3px_3px_0px_0px_#FFFFFF]"
-                    >
-                      ✗ Nice try — the preimage never leaves your wallet.
-                    </p>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setRevealTried(true)}
-                      className={`${FOCUS} font-mono text-xs text-[#10B981] font-bold underline decoration-2 underline-offset-4 hover:text-white transition-colors`}
-                    >
-                      ▸ attempt to decrypt
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Corner registration marks (crosshairs) */}
-              <span aria-hidden className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-white" />
-              <span aria-hidden className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-white" />
-              <span aria-hidden className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-white" />
-              <span aria-hidden className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-white" />
-
-              {/* Stamp — deploy metadata */}
-              <div className="hidden md:block absolute -right-3 -top-3 rotate-3 bg-[#10B981] text-[#0A0A0C] border-2 border-white px-3 py-1.5 font-mono text-[10px] font-black tracking-widest shadow-[3px_3px_0px_0px_#FFFFFF] uppercase">
-                zk-verified ✓
               </div>
             </div>
 
