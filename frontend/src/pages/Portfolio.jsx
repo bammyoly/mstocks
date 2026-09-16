@@ -5,15 +5,19 @@ import { useWallet } from '../context/WalletContext';
 import { TICKER_SYMBOLS, TICKER_NAMES, LOGO_DOMAINS } from '../lib/privateState';
 import { useLiveStockData } from '../hooks/useLiveStockData';
 
-const StockIcon = ({ symbol, size = 'w-6 h-6' }) => {
+const StockIcon = ({ symbol, size = 'w-8 h-8' }) => {
   const domain = LOGO_DOMAINS?.[symbol] || `${symbol?.toLowerCase()}.com`;
   return (
-    <div className={`${size} shrink-0 rounded-full bg-white border border-white overflow-hidden relative flex items-center justify-center`}>
+    <div
+      className={`${size} shrink-0 rounded-full bg-white border-2 border-white overflow-hidden relative flex items-center justify-center shadow-[2px_2px_0px_0px_#A855F7]`}
+    >
       <img
-        src={`https://logo.clearbit.com/${domain}`}
-        alt=""
-        className="w-full h-full object-contain p-0.5"
-        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
+        alt={symbol}
+        className="w-full h-full object-contain p-1"
+        onError={(e) => {
+          e.currentTarget.style.display = 'none';
+        }}
       />
     </div>
   );

@@ -17,20 +17,17 @@ const toContractPrice = (priceFloat) => BigInt(Math.floor(Number(priceFloat) * 1
 const StockIcon = ({ symbol, size = 'w-8 h-8' }) => {
   const domain = LOGO_DOMAINS?.[symbol] || `${symbol?.toLowerCase()}.com`;
   return (
-    <div className={`${size} shrink-0 rounded-full bg-white border-2 border-white overflow-hidden relative flex items-center justify-center shadow-[2px_2px_0px_0px_#A855F7]`}>
+    <div
+      className={`${size} shrink-0 rounded-full bg-white border-2 border-white overflow-hidden relative flex items-center justify-center shadow-[2px_2px_0px_0px_#A855F7]`}
+    >
       <img
-        src={`https://logo.clearbit.com/${domain}`}
-        alt=""
+        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
+        alt={symbol}
         className="w-full h-full object-contain p-1"
         onError={(e) => {
           e.currentTarget.style.display = 'none';
-          const fb = e.currentTarget.nextElementSibling;
-          if (fb) fb.style.display = 'flex';
         }}
       />
-      <div className="hidden absolute inset-0 bg-[#A855F7] items-center justify-center font-black text-white text-xs" style={{ display: 'none' }}>
-        {symbol?.charAt(0)}
-      </div>
     </div>
   );
 };

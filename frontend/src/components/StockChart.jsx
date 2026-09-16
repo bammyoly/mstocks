@@ -18,54 +18,57 @@ function StockChart({ tickerSymbol }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    // Generate a unique ID for this chart instance
-    const chartId = `tv_${Math.random().toString(36).substring(2, 9)}`;
-    if (containerRef.current) {
-      containerRef.current.id = chartId;
-    }
+    if (!containerRef.current) return;
 
-    let tvWidget = null;
+    // Reset container
+    containerRef.current.innerHTML = '';
+
     const tvSymbol = SYMBOL_MAP[tickerSymbol] || `NASDAQ:${tickerSymbol}`;
 
-    const script = document.createElement('script');
-    script.src = 'https://s3.tradingview.com/tv.js';
-    script.async = true;
-    script.onload = () => {
-      if (typeof window.TradingView !== 'undefined' && containerRef.current) {
-        tvWidget = new window.TradingView.widget({
-          autosize: true,
-          symbol: tvSymbol,
-          interval: '1', // 1-minute candles for live movement
-          timezone: 'Etc/UTC',
-          theme: 'dark',
-          style: '1',
-          locale: 'en',
-          enable_publishing: false,
-          backgroundColor: '#0A0A0C', // Matches neo-brutalist dark bg
-          gridColor: '#1A1A22',
-          hide_top_toolbar: false,
-          hide_legend: false,
-          save_image: false,
-          container_id: chartId,
-        });
-      }
-    };
+    const widgetDiv = document.createElement('div');
+    widgetDiv.className = 'tradingview-widget-container__widget';
+    widgetDiv.style.height = '100%';
+    widgetDiv.style.width = '100%';
+    containerRef.current.appendChild(widgetDiv);
 
-    document.head.appendChild(script);
+    const script = document.createElement('script');
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+    script.type = 'text/javascript';
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      autosize: true,
+      symbol: tvSymbol,
+      interval: '1',
+      timezone: 'Etc/UTC',
+      theme: 'dark',
+      style: '1',
+      locale: 'en',
+      enable_publishing: false,
+      allow_symbol_change: false,
+      calendar: false,
+      backgroundColor: '#0A0A0C',
+      gridColor: '#1A1A22',
+      hide_top_toolbar: false,
+      hide_legend: false,
+      save_image: false,
+      support_host: 'https://www.tradingview.com',
+    });
+
+    containerRef.current.appendChild(script);
 
     return () => {
-      if (tvWidget && typeof tvWidget.remove === 'function') {
-        try { tvWidget.remove(); } catch (e) {}
-      }
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
       }
     };
   }, [tickerSymbol]);
 
   return (
-    <div className="absolute inset-0 w-full h-full min-h-[320px] bg-[#0A0A0C] p-1">
-      <div ref={containerRef} className="w-full h-full" />
+    <div className="w-full h-full relative bg-[#0A0A0C]">
+      <div 
+        className="tradingview-widget-container w-full h-full" 
+        ref={containerRef} 
+      />
     </div>
   );
 }

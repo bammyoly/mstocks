@@ -44,7 +44,6 @@ export const TICKER_NAMES = {
   [Ticker.AMD]: 'Advanced Micro Devices',
 };
 
-// Exact domains to fetch the real, official logos from Clearbit
 export const LOGO_DOMAINS = {
   AAPL: 'apple.com',
   TSLA: 'tesla.com',
@@ -84,7 +83,7 @@ export const initialPrivateState = {
   trades: [],
   secretKeyHex: null,
   isVerified: false,
-  lastFaucetClaimAt: 0, // unix seconds
+  lastFaucetClaimAt: 0,
 };
 
 export function createWitnesses(getState, setState) {
@@ -97,7 +96,7 @@ export function createWitnesses(getState, setState) {
   return {
     getPrivateBalance: (ctx) => {
       const s = read();
-      const bal = BigInt(Math.floor(Number(s.cashBalance || 0) * 100)); // cents
+      const bal = BigInt(Math.floor(Number(s.cashBalance || 0) * 100));
       return [ctx.privateState ?? s, bal];
     },
     getPrivateStockPosition: (ctx, ticker) => {
